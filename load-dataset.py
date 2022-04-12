@@ -18,9 +18,14 @@ import time
 
 class DogCatDataset(Dataset):
     def __init__(self, img_dir):
-        self.img_dir = img_dir
+        # 后续未使用到，故可以不要
+        # self.img_dir = img_dir
+
+        # 获取路径下所有文件
         img_pths = glob.glob(img_dir + os.sep + '**.jpg')
+        # 断言
         assert img_pths, 'no jpg file in ' + img_dir
+
         self.img_pths = img_pths
 
     def __len__(self):
