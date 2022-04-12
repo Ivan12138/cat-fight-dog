@@ -25,7 +25,6 @@ class DogCatDataset(Dataset):
         img_pths = glob.glob(img_dir + os.sep + '**.jpg')
         # 断言
         assert img_pths, 'no jpg file in ' + img_dir
-
         self.img_pths = img_pths
 
     def __len__(self):
