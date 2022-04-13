@@ -16,6 +16,7 @@ from torch import nn
 import torch.nn.functional as F
 import time
 
+# 图片处理
 class DogCatDataset(Dataset):
     def __init__(self, img_dir):
         # 后续未使用到，故可以不要
@@ -32,20 +33,28 @@ class DogCatDataset(Dataset):
 
     def __getitem__(self, idx):
         img_pth = self.img_pths[idx]
+        # 获取图片名称
         img_name = img_pth.split(os.sep)[-1]
-
+        # 将文件标签化
         label = 1 if img_name.split('.')[0] == 'dog' else 0
+        # label tensor化
         label = torch.tensor(label)
+
         image = cv.imread(img_pth)
+
+        # original size(499, 381, 3)
         image = cv.resize(image, (360, 360), cv.INTER_LINEAR)  # resize
-        image = image / 255.0  # 归一化
+        image = image / 255.0  # 归一化 加快梯度下降求解速度
         image = torch.from_numpy(image)  # 转为Tensor
+        # 将cv读取图片维度变成torch储存方式维度
         image = image.permute(2, 0, 1).to(torch.float32)
         return image, label
 
-
+# 需要继承nn.Module
 class DogCatNet(nn.Module):
+    # 定义卷积层
     def __init__(self):
+        # 初始化父类
         super(DogCatNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 96, kernel_size=11, stride=4)
         self.pool = nn.MaxPool2d(kernel_size=3, stride=2)
@@ -55,7 +64,7 @@ class DogCatNet(nn.Module):
         self.fc2 = nn.Linear(256, 64)
         self.fc3 = nn.Linear(64, 32)
         self.fc4 = nn.Linear(32, 2)
-
+    # 数据流动
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
