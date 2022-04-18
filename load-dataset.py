@@ -69,6 +69,7 @@ class DogCatNet(nn.Module):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = self.pool(F.relu(self.conv3(x)))
+        # -1表示输出自动判断维度
         x = x.view(-1, 384 * 4 * 4)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -77,7 +78,7 @@ class DogCatNet(nn.Module):
 
         return x
 
-
+# 训练流程
 def train_loop(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
     t0 = time.time()
@@ -87,19 +88,22 @@ def train_loop(dataloader, model, loss_fn, optimizer):
             y = y.cuda()
         # Compute prediction and loss
         pred = model(X)
+        # 损失函数
         loss = loss_fn(pred, y)
 
         # Backpropagation
         optimizer.zero_grad()
+        # 反向传播
         loss.backward()
+        # 优化梯度
         optimizer.step()
-
+        # batch每隔10个
         if (batch + 1) % 10 == 0:
             loss, current = loss.item(), (batch + 1) * len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}] ({time.time() - t0:.3f}s)")
             t0 = time.time()
 
-
+# 这里不用模型训练，只需要使用train模型计算test_loss
 def test_loop(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
     test_loss, correct = 0, 0
